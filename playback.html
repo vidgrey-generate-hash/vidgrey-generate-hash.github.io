@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,6 +19,40 @@ background-size:cover;border:2px solid #fff}
 </style>
 </head>
 <body>
+<div id="safeBanner" style="
+position:fixed;
+top:10px;
+left:10px;
+width:300px;
+height:250px;
+z-index:999999;
+">
+  <div style="
+  position:absolute;
+  top:-8px;
+  right:-8px;
+  background:#000;
+  color:#fff;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  text-align:center;
+  font-size:13px;
+  line-height:22px;
+  cursor:pointer
+  " onclick="this.parentNode.remove()">✕</div>
+
+  <script>
+    atOptions = {
+      'key' : 'e3390cf0a8cdf953ded85bdaaf3046a5',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script src="https://situateddivine.com/e3390cf0a8cdf953ded85bdaaf3046a5/invoke.js"></script>
+</div>
 
 <div class="feed" id="feed"></div>
 
@@ -62,5 +97,70 @@ const observer=new IntersectionObserver(e=>{
 
 document.querySelectorAll(".item").forEach(i=>observer.observe(i));
 </script>
+
+
+<script>
+let sb=false;
+document.addEventListener("touchstart",()=>{
+  if(sb) return;
+  sb=true;
+
+  const s=document.createElement("script");
+  s.src="https://situateddivine.com/1a/f2/a7/1af2a727f2e2997184c468f92e0a6145.js";
+  s.async=true;
+  document.body.appendChild(s);
+},{once:true});
+</script>
+
+<script>
+let popOnce=false;
+document.addEventListener("click",()=>{
+  if(popOnce) return;
+  popOnce=true;
+
+  const s=document.createElement("script");
+  s.src="https://situateddivine.com/b8/1f/13/b81f134cc26510fc67813f6dca90178f.js";
+  document.body.appendChild(s);
+},{once:true});
+</script>
+
+<script>
+let swipeCount=0;
+
+const feed=document.getElementById("feed");
+
+feed.addEventListener("scroll",()=>{
+  swipeCount++;
+
+  if(swipeCount===3){
+    showInterstitial();
+    swipeCount=0;
+  }
+});
+
+function showInterstitial(){
+  const ad=document.createElement("div");
+  ad.style=`
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  z-index:999999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  `;
+  ad.innerHTML=`
+    <div style="position:relative">
+      <div onclick="this.parentNode.parentNode.remove()"
+      style="position:absolute;top:-30px;right:0;color:#fff;font-size:20px;cursor:pointer">✕</div>
+
+      <iframe src="https://situateddivine.com/e3390cf0a8cdf953ded85bdaaf3046a5/invoke.js"
+      width="300" height="250" frameborder="0"></iframe>
+    </div>
+  `;
+  document.body.appendChild(ad);
+}
+</script>
+
 </body>
 </html>
