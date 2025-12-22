@@ -28,6 +28,8 @@ video{
   width:100%;
   height:100%;
   object-fit:cover;
+  will-change:transform;
+  backface-visibility:hidden;
 }
 
 .user{
@@ -66,11 +68,12 @@ video{
 
 <body>
 
-<!-- ================= SAFE BANNER ================= -->
+<!-- ================= SAFE BANNER (BOTTOM) ================= -->
 <div id="safeBanner" style="
 position:fixed;
-top:10px;
-left:10px;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
 width:300px;
 height:250px;
 z-index:999999;
@@ -101,7 +104,7 @@ z-index:999999;
   </script>
   <script src="https://situateddivine.com/e3390cf0a8cdf953ded85bdaaf3046a5/invoke.js"></script>
 </div>
-<!-- ============================================== -->
+<!-- ======================================================== -->
 
 <div class="feed" id="feed"></div>
 
