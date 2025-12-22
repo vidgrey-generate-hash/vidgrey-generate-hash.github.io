@@ -1,331 +1,107 @@
-
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Dokumen Utama — Free and Simple Video Hosting</title>
-  <meta name="description" content="Mobile-first gallery — centered tidy layout" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#06050a;
-      --muted:rgba(255,255,255,0.72);
-      --accent1:#ff6f98;
-      --accent2:#ffd07a;
-      --glass-border: rgba(255,255,255,0.04);
-      --utility-h:44px;           /* height of the top utility bar */
-      --wrap-w:560px;             /* widened target mobile width center per request */
-      --pad:16px;
-      --card-radius:12px;
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-      background: linear-gradient(180deg,#05040a 0%, #09060d 100%);
-      color:#fff;
-      -webkit-font-smoothing:antialiased;
-      padding-top: calc(var(--utility-h) + 12px); /* leave room for utility bar */
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* centered wider wrapper */
-    .wrap{
-      max-width:var(--wrap-w);
-      margin:0 auto;
-      padding:0 var(--pad) 80px;
-    }
-
-    /* UTILITY BAR - centered, NO horizontal scroll, fixed width */
-    .utility-bar{
-      position:fixed;
-      left:0; right:0; top:0;
-      height:var(--utility-h);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#000;
-      z-index:220;
-      border-bottom:1px solid rgba(255,255,255,0.02);
-      font-size:14px;
-    }
-    .util-inner{
-      width:100%;
-      max-width:var(--wrap-w);
-      margin:0 auto;
-      padding:0 14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      white-space:nowrap;        /* keep one line */
-      overflow:visible;         /* important: no scroll/auto */
-      /* if viewport smaller than max-width, links may be clipped — user allowed widening */
-    }
-    .util-inner a{
-      color:#fff;
-      text-decoration:none;
-      padding:6px 8px;
-      opacity:0.96;
-      font-weight:600;
-      font-size:14px;
-      line-height:1;
-    }
-    .util-inner a.donate{
-      color:#ffccd7;
-      font-weight:800;
-    }
-    .util-sep{ color: rgba(255,255,255,0.16); padding:0 6px; }
-
-    /* header */
-    header.top{
-      display:flex; align-items:center; gap:12px; margin-bottom:10px;
-      position:sticky; top: calc(var(--utility-h) + 8px);
-      z-index:80;
-      background: linear-gradient(180deg, rgba(6,5,10,0.92), rgba(6,5,10,0.65));
-      padding:10px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.02);
-      backdrop-filter: blur(4px);
-    }
-    .brand{display:flex; gap:10px; align-items:center; min-width:0}
-    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;color:#111;font-weight:700;font-family:Playfair Display,serif}
-    .title{font-weight:700;font-size:15px}
-    .small{font-size:12px;color:var(--muted)}
-
-    .actions{margin-left:auto; display:flex; gap:8px; align-items:center}
-    .btn{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid var(--glass-border);color:var(--muted);font-weight:600}
-
-    /* list/cards */
-    .list{display:flex; flex-direction:column; gap:16px; margin-top:8px}
-    .card{
-      display:block;
-      width:100%;
-      border-radius:var(--card-radius);
-      overflow:hidden;
-      position:relative;
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-      border:1px solid rgba(255,255,255,0.03);
-      box-shadow: 0 6px 22px rgba(0,0,0,0.6);
-      text-decoration:none; color:inherit;
-      -webkit-tap-highlight-color:transparent;
-    }
-    .thumb{width:100%; height:170px; background:#111; display:block; position:relative}
-    .thumb img{width:100%; height:100%; object-fit:cover; display:block}
-
-    .overlay{position:absolute; left:12px; right:12px; bottom:12px; padding:0; display:flex; align-items:center; justify-content:space-between; gap:12px; pointer-events:none;}
-    .meta-left{display:flex; flex-direction:column; gap:4px; min-width:0}
-    .meta-title{font-weight:700;font-size:15px;margin:0;color:#fff;text-shadow:0 3px 10px rgba(0,0,0,0.6)}
-    .meta-sub{font-size:12px;color:var(--muted)}
-
-    .meta-right{display:flex; gap:10px; align-items:center; flex-shrink:0}
-    .duration{background: rgba(0,0,0,0.6); padding:6px 8px; border-radius:12px; font-weight:700; color:#fff; font-size:12px}
-    .play-pill{pointer-events:auto;background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#111; padding:8px 12px; border-radius:999px; font-weight:800; font-size:13px}
-
-    .card + .card{ margin-top:8px; }
-
-    .pager-wrap{display:flex; justify-content:center; gap:12px; margin-top:18px; margin-bottom:36px}
-    .pager-btn{padding:12px 20px;border-radius:999px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#111;border:none;font-weight:800}
-    .pager-btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-
-    footer{ text-align:center;color:var(--muted); font-size:13px; margin-top:8px; padding-bottom:20px;}
-
-    @media(min-width:720px){
-      .wrap{ padding:0 18px; }
-      .thumb{ height:200px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trending Videos</title>
+<style>
+body{margin:0;background:#000;color:#fff;font-family:sans-serif}
+h2{text-align:center;padding:14px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.card{position:relative;aspect-ratio:9/16;border-radius:12px;overflow:hidden}
+.card video{width:100%;height:100%;object-fit:cover}
+.label{position:absolute;bottom:0;width:100%;padding:6px;
+background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
+.read-more-wrap{text-align:center;padding:20px}
+.read-more{padding:10px 24px;border-radius:20px;border:none;cursor:pointer}
+</style>
 </head>
 <body>
-  <!-- utility bar -->
-  <div class="utility-bar" role="navigation" aria-label="Utility links">
-    <div class="util-inner" id="utilInner">
-      <a href="#report" id="reportAbuse">Report Abuse</a>
-      <span class="util-sep">|</span>
-      <a id="topDonate" class="donate" href="#">Donate! ❤️</a>
-      <span class="util-sep">|</span>
-      <a href="#advertise" id="advertise">Advertise</a>
-    </div>
-  </div>
 
-  <div class="wrap">
-    <header class="top" role="banner">
-      <div class="brand">
-        <div class="logo">DK</div>
-        <div>
-          <div class="title">Dokumen Utama Video Collection</div>
-          <div class="small">Free and Simple Video Hosting</div>
-        </div>
-      </div>
+<h2>Trending Videos</h2>
 
-      <div class="actions" role="search">
-        <!-- Search removed per request -->
-        <button id="shuffle" class="btn" title="Shuffle">Shuffle</button>
-      </div>
-    </header>
+<div class="grid" id="grid"></div>
+ <script src="https://beginshello.com/dc/a1/4d/dca14dec92458affc67118718553c06b.js"></script>
+<div class="read-more-wrap">
+  <button class="read-more" id="more">Read More</button>
+</div>
+<script async="async" data-cfasync="false" src="https://situateddivine.com/9bcdea4a86809574df124c776acac64d/invoke.js"></script>
+<div id="container-9bcdea4a86809574df124c776acac64d"></div>
 
-    <main>
-      <section id="list" class="list" aria-live="polite" aria-label="Video list">
-        <!-- cards inserted by JS -->
-      </section>
 
-      <div class="pager-wrap">
-        <button id="prevBtn" class="pager-btn secondary" style="display:none">Previous</button>
-      </div>
-    </main>
+<script>
+const MAIN=[
+ {id:"9SAVnGA21",user:"@9SAVnGA21",src:"https://cdn.videy.co/9SAVnGA21.mp4",avatar:"https://i.pravatar.cc/150?img=1"},
+ {id:"lTF4KPtX1",user:"@lTF4KPtX1",src:"https://cdn.videy.co/lTF4KPtX1.mp4",avatar:"https://i.pravatar.cc/150?img=2"},
+ {id:"BHtcImHS1",user:"@BHtcImHS1",src:"https://cdn.videy.co/BHtcImHS1.mp4",avatar:"https://i.pravatar.cc/150?img=3"},
+ {id:"pXNYp2ba1",user:"@pXNYp2ba1",src:"https://cdn.videy.co/pXNYp2ba1.mp4",avatar:"https://i.pravatar.cc/150?img=4"},
+ {id:"eATPQQXV1",user:"@eATPQQXV1",src:"https://cdn.videy.co/eATPQQXV1.mp4",avatar:"https://i.pravatar.cc/150?img=5"},
+ {id:"F5adDTDn1",user:"@F5adDTDn1",src:"https://cdn.videy.co/F5adDTDn1.mp4",avatar:"https://i.pravatar.cc/150?img=6"},
+ {id:"Or2oou7A1",user:"@Or2oou7A1",src:"https://cdn.videy.co/Or2oou7A1.mp4",avatar:"https://i.pravatar.cc/150?img=7"},
+ {id:"bCIhkCBl1",user:"@bCIhkCBl1",src:"https://cdn.videy.co/bCIhkCBl1.mp4",avatar:"https://i.pravatar.cc/150?img=8"},
+ {id:"iLPkCx1N1",user:"@iLPkCx1N1",src:"https://cdn.videy.co/iLPkCx1N1.mp4",avatar:"https://i.pravatar.cc/150?img=9"},
+ {id:"9tUFlboH1",user:"@9tUFlboH1",src:"https://cdn.videy.co/9tUFlboH1.mp4",avatar:"https://i.pravatar.cc/150?img=0"},
+ {id:"nvfHWWJ81",user:"@nvfHWWJ81",src:"https://cdn.videy.co/nvfHWWJ81.mp4",avatar:"https://i.pravatar.cc/150?img=11"},
+ {id:"8Oe99k2s1",user:"@8Oe99k2s1",src:"https://cdn.videy.co/8Oe99k2s1.mp4",avatar:"https://i.pravatar.cc/150?img=12"},
+ {id:"lN6vMui51",user:"@lN6vMui51",src:"https://cdn.videy.co/lN6vMui51.mp4",avatar:"https://i.pravatar.cc/150?img=13"},
+ {id:"spz0kQ7l1",user:"@spz0kQ7l1",src:"https://cdn.videy.co/spz0kQ7l1.mp4",avatar:"https://i.pravatar.cc/150?img=14"},
+ {id:"uiUwCo2d1",user:"@uiUwCo2d1",src:"https://cdn.videy.co/uiUwCo2d1.mp4",avatar:"https://i.pravatar.cc/150?img=15"}
+];
 
-    <footer>© amplify-video-tv <span id="year"></span></footer>
-  </div>
+const MORE=[
+ {id:"qN2Su3mj1",user:"@qN2Su3mj1",src:"https://cdn.videy.co/qN2Su3mj1.mp4",avatar:"https://i.pravatar.cc/150?img=16"},
+ {id:"Ri9orsH31",user:"@Ri9orsH31",src:"https://cdn.videy.co/Ri9orsH31.mp4",avatar:"https://i.pravatar.cc/150?img=17"},
+ {id:"aV6DBqgD1",user:"@aV6DBqgD1",src:"https://cdn.videy.co/aV6DBqgD1.mp4",avatar:"https://i.pravatar.cc/150?img=18"},
+ {id:"G9lYsCwu1",user:"@G9lYsCwu1",src:"https://cdn.videy.co/G9lYsCwu1.mp4",avatar:"https://i.pravatar.cc/150?img=19"},
+ {id:"ZZZkMlcd1",user:"@ZZZkMlcd1",src:"https://cdn.videy.co/ZZZkMlcd1.mp4",avatar:"https://i.pravatar.cc/150?img=20"},
+ {id:"Jh0fGBSf1",user:"@Jh0fGBSf1",src:"https://cdn.videy.co/Jh0fGBSf1.mp4",avatar:"https://i.pravatar.cc/150?img=21"},
+ {id:"5EgCgqjJ1",user:"@5EgCgqjJ1",src:"https://cdn.videy.co/5EgCgqjJ1.mp4",avatar:"https://i.pravatar.cc/150?img=22"},
+ {id:"7HOtYFLD1",user:"@7HOtYFLD1",src:"https://cdn.videy.co/7HOtYFLD1.mp4",avatar:"https://i.pravatar.cc/150?img=23"},
+ {id:"l1TrW58Z1",user:"@l1TrW58Z1",src:"https://cdn.videy.co/l1TrW58Z1.mp4",avatar:"https://i.pravatar.cc/150?img=24"},
+ {id:"2uSzlZVu1",user:"@WppYP2UD1",src:"https://cdn.videy.co/WppYP2UD1.mp4",avatar:"https://i.pravatar.cc/150?img=25"},
+ {id:"CHzqn7fd1",user:"@CHzqn7fd1",src:"https://cdn.videy.co/CHzqn7fd1.mp4",avatar:"https://i.pravatar.cc/150?img=26"},
+ {id:"GXBCeFnE1",user:"@GXBCeFnE1",src:"https://cdn.videy.co/GXBCeFnE1.mp4",avatar:"https://i.pravatar.cc/150?img=27"},
+ {id:"L1gX87iM1",user:"@L1gX87iM1",src:"https://cdn.videy.co/L1gX87iM1.mp4",avatar:"https://i.pravatar.cc/150?img=28"},
+ {id:"QeOAE6CB1",user:"@QeOAE6CB1",src:"https://cdn.videy.co/QeOAE6CB1.mp4",avatar:"https://i.pravatar.cc/150?img=29"},
+ {id:"SfsHFSPL1",user:"@SfsHFSPL1",src:"https://cdn.videy.co/SfsHFSPL1.mp4",avatar:"https://i.pravatar.cc/150?img=30"}
+];
+const grid=document.getElementById("grid");
 
-  <script>
-  (function(){
-    const initialVideos = [
-      {"id":4,"title":"ZSMvGmtd1","thumb":"https://cdn.aceimg.com/f5023e70c.jpg","thumb2x":"https://cdn.aceimg.com/f5023e70c.jpg","url":"https://cdn-sude078.github.io/ZSMvGmtd1.mp4","duration":"0:38"},
-      {"id":4,"title":"ocet5tz21","thumb":"https://cdn.aceimg.com/06ac0c861.jpg","thumb2x":"https://cdn.aceimg.com/06ac0c861.jpg","url":"https://cdn-sude078.github.io/ocet5tz21.mp4","duration":"0:36"},
-      {"id":4,"title":"qUQ4kOVi1","thumb":"https://cdn.aceimg.com/8b18195e3.jpg","thumb2x":"https://cdn.aceimg.com/8b18195e3.jpg","url":"https://cdn-sude078.github.io/qUQ4kOVi1.mp4","duration":"0:54"},
-      {"id":4,"title":"yAKkF9281","thumb":"https://cdn.aceimg.com/0f81d0fc0.jpg","thumb2x":"https://cdn.aceimg.com/0f81d0fc0.jpg","url":"https://cdn-sude078.github.io/yAKkF9281.mp4","duration":"1:58"},
-      {"id":4,"title":"qY4Hzy331","thumb":"https://cdn.aceimg.com/60955f228.jpg","thumb2x":"https://cdn.aceimg.com/60955f228.jpg","url":"https://cdn-sude078.github.io/qY4Hzy331.mp4","duration":"5:03"},
-      {"id":4,"title":"MWWz9Q891","thumb":"https://cdn.aceimg.com/52f21483c.jpg","thumb2x":"https://cdn.aceimg.com/52f21483c.jpg","url":"https://cdn-sude078.github.io/MWWz9Q891.mp4","duration":"2:45"},
-      {"id":4,"title":"Vwx6h1Ll1","thumb":"https://cdn.aceimg.com/d872b0afb.jpg","thumb2x":"https://cdn.aceimg.com/d872b0afb.jpg","url":"https://cdn-sude078.github.io/Vwx6h1Ll1.mp4","duration":"3:34"},
-      {"id":4,"title":"pErKKIB41","thumb":"https://cdn.aceimg.com/bcd723473.jpg","thumb2x":"https://cdn.aceimg.com/bcd723473.jpg","url":"https://cdn-sude078.github.io/pErKKIB41.mp4","duration":"2:26"},
-      {"id":4,"title":"uXIyFMdw1","thumb":"https://cdn.aceimg.com/62be602e2.png","thumb2x":"https://cdn.aceimg.com/62be602e2.png","url":"https://cdn-sude078.github.io/uXIyFMdw1.mp4","duration":"4:44"},
-      {"id":4,"title":"zuqsnqDZ1","thumb":"https://cdn.aceimg.com/ea1b113d6.jpg","thumb2x":"https://cdn.aceimg.com/ea1b113d6.jpg","url":"https://cdn-sude078.github.io/zuqsnqDZ1.mp4","duration":"1:00"},
-      {"id":4,"title":"g3Cn2G1b1","thumb":"https://cdn.aceimg.com/c109b3187.jpg","thumb2x":"https://cdn.aceimg.com/c109b3187.jpg","url":"https://cdn-sude078.github.io/g3Cn2G1b1.mp4","duration":"5:13"},
-      {"id":4,"title":"fG0zS54B1","thumb":"https://cdn.aceimg.com/6411a6eb5.jpg","thumb2x":"https://cdn.aceimg.com/6411a6eb5.jpg","url":"https://t.co/FXbJ0CbFIp","duration":"01:42"},
-      {"id":4,"title":"Re5am8kd1","thumb":"https://cdn.aceimg.com/f7d64ea0e.jpg","thumb2x":"https://cdn.aceimg.com/f7d64ea0e.jpg","url":"https://t.co/FXbJ0CbFIp","duration":"06:01"},
-      {"id":4,"title":"51BzIZo41","thumb":"https://cdn.aceimg.com/f4d516327.jpg","thumb2x":"https://cdn.aceimg.com/f4d516327.jpg","url":"https://t.co/FXbJ0CbFIp","duration":"02:20"},
-      {"id":4,"title":"Video 15","thumb":"https://picsum.photos/seed/vt15/900/600","thumb2x":"https://picsum.photos/seed/vt15/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"03:05"},
-      {"id":4,"title":"Video 16","thumb":"https://picsum.photos/seed/vt16/900/600","thumb2x":"https://picsum.photos/seed/vt16/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"02:48"},
-      {"id":4,"title":"Video 17","thumb":"https://picsum.photos/seed/vt17/900/600","thumb2x":"https://picsum.photos/seed/vt17/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"03:30"},
-      {"id":4,"title":"Video 18","thumb":"https://picsum.photos/seed/vt18/900/600","thumb2x":"https://picsum.photos/seed/vt18/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"04:00"},
-      {"id":4,"title":"Video 19","thumb":"https://picsum.photos/seed/vt19/900/600","thumb2x":"https://picsum.photos/seed/vt19/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"02:12"},
-      {"id":4,"title":"Video 20","thumb":"https://picsum.photos/seed/vt20/900/600","thumb2x":"https://picsum.photos/seed/vt20/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"05:20"},
-      {"id":4,"title":"Video 21","thumb":"https://picsum.photos/seed/vt21/900/600","thumb2x":"https://picsum.photos/seed/vt21/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"03:18"},
-      {"id":4,"title":"Video 22","thumb":"https://picsum.photos/seed/vt22/900/600","thumb2x":"https://picsum.photos/seed/vt22/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"02:37"},
-      {"id":4,"title":"Video 23","thumb":"https://picsum.photos/seed/vt23/900/600","thumb2x":"https://picsum.photos/seed/vt23/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"04:09"},
-      {"id":4,"title":"Video 24","thumb":"https://picsum.photos/seed/vt24/900/600","thumb2x":"https://picsum.photos/seed/vt24/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"01:55"},
-      {"id":4,"title":"Video 25","thumb":"https://picsum.photos/seed/vt25/900/600","thumb2x":"https://picsum.photos/seed/vt25/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"03:44"},
-      {"id":4,"title":"Video 26","thumb":"https://picsum.photos/seed/vt26/900/600","thumb2x":"https://picsum.photos/seed/vt26/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"02:29"},
-      {"id":4,"title":"Video 27","thumb":"https://picsum.photos/seed/vt27/900/600","thumb2x":"https://picsum.photos/seed/vt27/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"03:52"},
-      {"id":4,"title":"Video 28","thumb":"https://picsum.photos/seed/vt28/900/600","thumb2x":"https://picsum.photos/seed/vt28/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"04:18"},
-      {"id":4,"title":"Video 29","thumb":"https://picsum.photos/seed/vt29/900/600","thumb2x":"https://picsum.photos/seed/vt29/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"02:02"},
-      {"id":4,"title":"Video 30","thumb":"https://picsum.photos/seed/vt30/900/600","thumb2x":"https://picsum.photos/seed/vt30/1200/800","url":"https://t.co/FXbJ0CbFIp","duration":"03:09"}
-    ];
+function render(list){
+ list.forEach((v,i)=>{
+  const d=document.createElement("div");
+  d.className="card";
+  d.innerHTML=`
+   <video src="${v.src}#t=0.1" muted playsinline></video>
+   <div class="label">${v.user}</div>`;
+  d.onclick=()=>{
+    localStorage.setItem("VIDEO_LIST",JSON.stringify([...MAIN,...MORE]));
+    localStorage.setItem("START_INDEX",i);
+    location.href="playback.html?vid="+v.id;
+  };
+  grid.appendChild(d);
+ });
+}
 
-    const moreVideos = [
-      {"id":4,"title":"Video 31","thumb":"https://picsum.photos/seed/v31/900/600","thumb2x":"https://picsum.photos/seed/v31/1200/800","url":"https://example.com/watch/31","duration":"02:20"},
-      {"id":4,"title":"Video 32","thumb":"https://picsum.photos/seed/v32/900/600","thumb2x":"https://picsum.photos/seed/v32/1200/800","url":"https://example.com/watch/32","duration":"01:07"},
-      {"id":4,"title":"Video 33","thumb":"https://picsum.photos/seed/v33/900/600","thumb2x":"https://picsum.photos/seed/v33/1200/800","url":"https://example.com/watch/33","duration":"03:57"},
-      {"id":4,"title":"Video 34","thumb":"https://picsum.photos/seed/v34/900/600","thumb2x":"https://picsum.photos/seed/v34/1200/800","url":"https://example.com/watch/34","duration":"02:44"},
-      {"id":4,"title":"Video 35","thumb":"https://picsum.photos/seed/v35/900/600","thumb2x":"https://picsum.photos/seed/v35/1200/800","url":"https://example.com/watch/35","duration":"03:31"},
-      {"id":4,"title":"Video 36","thumb":"https://picsum.photos/seed/v36/900/600","thumb2x":"https://picsum.photos/seed/v36/1200/800","url":"https://example.com/watch/36","duration":"04:05"},
-      {"id":4,"title":"Video 37","thumb":"https://picsum.photos/seed/v37/900/600","thumb2x":"https://picsum.photos/seed/v37/1200/800","url":"https://example.com/watch/37","duration":"03:12"},
-      {"id":4,"title":"Video 38","thumb":"https://picsum.photos/seed/v38/900/600","thumb2x":"https://picsum.photos/seed/v38/1200/800","url":"https://example.com/watch/38","duration":"02:18"},
-      {"id":4,"title":"Video 39","thumb":"https://picsum.photos/seed/v39/900/600","thumb2x":"https://picsum.photos/seed/v39/1200/800","url":"https://example.com/watch/39","duration":"04:44"},
-      {"id":4,"title":"Video 40","thumb":"https://picsum.photos/seed/v40/900/600","thumb2x":"https://picsum.photos/seed/v40/1200/800","url":"https://example.com/watch/40","duration":"03:10"},
-      {"id":4,"title":"Video 41","thumb":"https://picsum.photos/seed/v41/900/600","thumb2x":"https://picsum.photos/seed/v41/1200/800","url":"https://example.com/watch/41","duration":"02:55"},
-      {"id":4,"title":"Video 42","thumb":"https://picsum.photos/seed/v42/900/600","thumb2x":"https://picsum.photos/seed/v42/1200/800","url":"https://example.com/watch/42","duration":"01:42"},
-      {"id":4,"title":"Video 43","thumb":"https://picsum.photos/seed/v43/900/600","thumb2x":"https://picsum.photos/seed/v43/1200/800","url":"https://example.com/watch/43","duration":"06:01"},
-      {"id":4,"title":"Video 44","thumb":"https://picsum.photos/seed/v44/900/600","thumb2x":"https://picsum.photos/seed/v44/1200/800","url":"https://example.com/watch/44","duration":"02:20"},
-      {"id":4,"title":"Video 45","thumb":"https://picsum.photos/seed/v45/900/600","thumb2x":"https://picsum.photos/seed/v45/1200/800","url":"https://example.com/watch/45","duration":"03:05"},
-      {"id":4,"title":"Video 46","thumb":"https://picsum.photos/seed/v46/900/600","thumb2x":"https://picsum.photos/seed/v46/1200/800","url":"https://example.com/watch/46","duration":"02:48"},
-      {"id":4,"title":"Video 47","thumb":"https://picsum.photos/seed/v47/900/600","thumb2x":"https://picsum.photos/seed/v47/1200/800","url":"https://example.com/watch/47","duration":"03:30"},
-      {"id":4,"title":"Video 48","thumb":"https://picsum.photos/seed/v48/900/600","thumb2x":"https://picsum.photos/seed/v48/1200/800","url":"https://example.com/watch/48","duration":"04:00"},
-      {"id":4,"title":"Video 49","thumb":"https://picsum.photos/seed/v49/900/600","thumb2x":"https://picsum.photos/seed/v49/1200/800","url":"https://example.com/watch/49","duration":"02:12"},
-      {"id":4,"title":"Video 50","thumb":"https://picsum.photos/seed/v50/900/600","thumb2x":"https://picsum.photos/seed/v50/1200/800","url":"https://example.com/watch/50","duration":"05:20"},
-      {"id":4,"title":"Video 51","thumb":"https://picsum.photos/seed/v51/900/600","thumb2x":"https://picsum.photos/seed/v51/1200/800","url":"https://example.com/watch/51","duration":"03:18"},
-      {"id":4,"title":"Video 52","thumb":"https://picsum.photos/seed/v52/900/600","thumb2x":"https://picsum.photos/seed/v52/1200/800","url":"https://example.com/watch/52","duration":"02:37"},
-      {"id":4,"title":"Video 53","thumb":"https://picsum.photos/seed/v53/900/600","thumb2x":"https://picsum.photos/seed/v53/1200/800","url":"https://example.com/watch/53","duration":"04:09"},
-      {"id":4,"title":"Video 54","thumb":"https://picsum.photos/seed/v54/900/600","thumb2x":"https://picsum.photos/seed/v54/1200/800","url":"https://example.com/watch/54","duration":"01:55"},
-      {"id":4,"title":"Video 55","thumb":"https://picsum.photos/seed/v55/900/600","thumb2x":"https://picsum.photos/seed/v55/1200/800","url":"https://example.com/watch/55","duration":"03:44"},
-      {"id":4,"title":"Video 56","thumb":"https://picsum.photos/seed/v56/900/600","thumb2x":"https://picsum.photos/seed/v56/1200/800","url":"https://example.com/watch/56","duration":"02:29"},
-      {"id":4,"title":"Video 57","thumb":"https://picsum.photos/seed/v57/900/600","thumb2x":"https://picsum.photos/seed/v57/1200/800","url":"https://example.com/watch/57","duration":"03:52"},
-      {"id":4,"title":"Video 58","thumb":"https://picsum.photos/seed/v58/900/600","thumb2x":"https://picsum.photos/seed/v58/1200/800","url":"https://example.com/watch/58","duration":"04:18"},
-      {"id":4,"title":"Video 59","thumb":"https://picsum.photos/seed/v59/900/600","thumb2x":"https://picsum.photos/seed/v59/1200/800","url":"https://example.com/watch/59","duration":"02:02"},
-      {"id":4,"title":"Video 60","thumb":"https://picsum.photos/seed/v60/900/600","thumb2x":"https://picsum.photos/seed/v60/1200/800","url":"https://example.com/watch/60","duration":"03:09"}
-    ];
+render(MAIN);
 
-    const list = document.getElementById('list');
-    const shuffleBtn = document.getElementById('shuffle');
-    const readMoreBtn = document.getElementById('readMoreBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const yearEl = document.getElementById('year');
-    const topDonate = document.getElementById('topDonate');
+document.getElementById("more").onclick=()=>{
+ render(MORE);
+ document.getElementById("more").style.display="none";
+};
+</script>
 
-    yearEl && (yearEl.textContent = new Date().getFullYear());
-    let currentSet = 'initial';
-
-    function render(arr){
-      list.innerHTML = '';
-      arr.forEach(v => {
-        const a = document.createElement('a');
-        a.className = 'card';
-        a.href = v.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-
-        a.innerHTML = `
-          <div class="thumb" aria-hidden="true">
-            <img loading="lazy" src="${v.thumb}" srcset="${v.thumb} 640w, ${v.thumb2x || v.thumb} 1200w" sizes="(max-width:720px) 100vw, 50vw" alt="${v.title}">
-            <div class="overlay">
-              <div class="meta-left">
-                <div class="meta-title">${v.title}</div>
-                <div class="meta-sub">•Mp${v.id}</div>
-              </div>
-              <div class="meta-right">
-                <div class="duration">${v.duration || '--:--'}</div>
-                <div class="play-pill">▶ Play</div>
-              </div>
-            </div>
-          </div>
-        `;
-        list.appendChild(a);
-      });
-    }
-
-    // initial display uses the first 30 (initialVideos)
-    render(initialVideos.slice(0,30));
-    prevBtn.style.display = 'none';
-    readMoreBtn.textContent = 'Read more';
-
-    // Read more loads the next 30 (moreVideos)
-    readMoreBtn && readMoreBtn.addEventListener('click', ()=>{
-      if(currentSet === 'initial'){
-        render(moreVideos.slice(0,30));
-        currentSet = 'more';
-        prevBtn.style.display = '';
-        readMoreBtn.textContent = 'Newest 30';
-        window.scrollTo({top:0, behavior:'smooth'});
-      }
-    });
-
-    prevBtn && prevBtn.addEventListener('click', ()=>{
-      if(currentSet === 'more'){
-        render(initialVideos.slice(0,30));
-        currentSet = 'initial';
-        prevBtn.style.display = 'none';
-        readMoreBtn.textContent = 'Read more';
-        window.scrollTo({top:0, behavior:'smooth'});
-      }
-    });
-
-    shuffleBtn && shuffleBtn.addEventListener('click', ()=>{
-      const arr = (currentSet === 'initial' ? initialVideos.slice(0,30) : moreVideos.slice(0,30)).slice();
-      for(let i = arr.length-1; i>0; i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      render(arr); window.scrollTo({top:0, behavior:'smooth'});
-    });
-
-    topDonate && topDonate.addEventListener('click', (e)=>{ e.preventDefault(); window.open('#donate','_blank','noopener'); });
-
-    // performance preconnect
-    const p = document.createElement('link'); p.rel='preconnect'; p.href='https://picsum.photos'; document.head.appendChild(p);
-  })();
-  </script>
 </body>
 </html>
+<!-- Histats.com  START  (aync)-->
+<script type="text/javascript">var _Hasync= _Hasync|| [];
+_Hasync.push(['Histats.start', '1,4992245,4,511,95,18,00000000']);
+_Hasync.push(['Histats.fasi', '1']);
+_Hasync.push(['Histats.track_hits', '']);
+(function() {
+var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+hs.src = ('//s10.histats.com/js15_as.js');
+(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+})();</script>
+<noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?4992245&101" alt="" border="0"></a></noscript>
+<!-- Histats.com  END  -->
