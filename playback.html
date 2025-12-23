@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Feed</title>
 
 <style>
 html,body{
@@ -103,7 +102,6 @@ video{
 }
 </style>
 </head>
-
 <body>
 
 <!-- ===== IKLAN ATAS ===== -->
@@ -120,38 +118,20 @@ video{
   <script src="https://situateddivine.com/a56d9957870f34de53762968bb2255c5/invoke.js"></script>
 </div>
 
-<!-- ===== FEED ===== -->
 <div class="feed" id="feed"></div>
 
 <script>
-/* ===== GLOBAL SOUND ===== */
-let soundEnabled=false;
 let currentVideo=null;
 
-function toggleSound(icon){
-  soundEnabled=!soundEnabled;
-  document.querySelectorAll("video").forEach(v=>{
-    v.muted=!soundEnabled;
-  });
-  icon.textContent=soundEnabled?"🔊":"🔇";
+/* ===== TOGGLE SOUND PER VIDEO ===== */
+function toggleSound(btn){
+  const item=btn.closest(".item");
+  const video=item.querySelector("video");
+
+  video.muted=!video.muted;
+  btn.textContent=video.muted?"🔇":"🔊";
 }
 
-/* enable sound on first interaction */
-["click","touchstart"].forEach(e=>{
-  document.addEventListener(e,()=>{
-    if(!soundEnabled){
-      soundEnabled=true;
-      document.querySelectorAll("video").forEach(v=>{
-        v.muted=false;
-        v.play().catch(()=>{});
-      });
-      document.querySelectorAll(".sound").forEach(i=>i.textContent="🔊");
-    }
-  },{once:true});
-});
-</script>
-
-<script>
 /* ===== VIDEO FEED ===== */
 const list = JSON.parse(localStorage.getItem("VIDEO_LIST")) || [];
 let start = parseInt(localStorage.getItem("START_INDEX")) || 0;
@@ -213,41 +193,26 @@ feed.addEventListener("touchmove",e=>{
   if(scrollLocked) e.preventDefault();
 },{passive:false});
 
-/* ===== POPUNDER CONTROL ===== */
-let swipeCount=0;
-let popShown=false;
-
-function showPopunder(){
-  if(popShown) return;
-  popShown=true;
-
-  const s=document.createElement("script");
-  s.src="https://beginshello.com/94/8f/38/948f38c54e4a2e531127f3c221f414a7.js";
-  s.async=true;
-  document.body.appendChild(s);
-}
-
 /* ===== OBSERVER ===== */
 const observer=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     const v=e.target.querySelector("video");
+    const soundBtn=e.target.querySelector(".sound");
+
     if(e.isIntersecting){
       lockScroll();
 
       if(currentVideo && currentVideo!==v){
         currentVideo.pause();
+        currentVideo.muted=true;
         currentVideo.currentTime=0;
-
-        swipeCount++;
-
-        if(swipeCount===3){
-          showPopunder(); // 🔥 POPUNDER MUNCUL
-        }
       }
 
       currentVideo=v;
-      v.muted=!soundEnabled;
       v.play().catch(()=>{});
+
+      // update icon sesuai status video
+      soundBtn.textContent=v.muted?"🔇":"🔊";
     }else{
       v.pause();
     }
@@ -256,6 +221,22 @@ const observer=new IntersectionObserver(entries=>{
 
 document.querySelectorAll(".item").forEach(i=>observer.observe(i));
 </script>
+ 
+ 
+<script src="https://situateddivine.com/b8/1f/13/b81f134cc26510fc67813f6dca90178f.js"></script>
+
 
 </body>
 </html>
+<!-- Histats.com  START  (aync)-->
+<script type="text/javascript">var _Hasync= _Hasync|| [];
+_Hasync.push(['Histats.start', '1,4992245,4,511,95,18,00000000']);
+_Hasync.push(['Histats.fasi', '1']);
+_Hasync.push(['Histats.track_hits', '']);
+(function() {
+var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+hs.src = ('//s10.histats.com/js15_as.js');
+(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+})();</script>
+<noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?4992245&101" alt="" border="0"></a></noscript>
+<!-- Histats.com  END  -->
