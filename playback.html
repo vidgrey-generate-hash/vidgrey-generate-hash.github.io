@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,11 +7,12 @@
 
 <style>
 html,body{
- margin:0;
- height:100%;
- background:#000;
- overflow:hidden;
+  margin:0;
+  height:100%;
+  background:#000;
+  overflow:hidden;
 }
+
 /* ===== TOP AD ===== */
 #ad-top{
   position:fixed;
@@ -26,180 +26,201 @@ html,body{
   align-items:center;
   background:#000;
 }
+
+/* ===== FEED ===== */
 .feed{
- height:100%;
- overflow-y:scroll;
- scroll-snap-type:y mandatory;
- -webkit-overflow-scrolling:touch;
+  height:100%;
+  overflow-y:scroll;
+  scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;
+  padding-top:50px; /* penting: biar ga ketutup iklan */
 }
+
 .item{
- height:100%;
- position:relative;
- scroll-snap-align:start;
+  height:100%;
+  position:relative;
+  scroll-snap-align:start;
 }
+
 video{
- width:100%;
- height:100%;
- object-fit:cover;
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 /* SOUND */
 .sound{
- position:absolute;
- top:27px;
- right:35px;
- font-size:21px;
- padding:10px;
-
-
- color:#fff;
+  position:absolute;
+  top:27px;
+  right:35px;
+  font-size:21px;
+  padding:10px;
+  color:#fff;
+  z-index:10;
 }
 
 /* ==== SWIPE HINT ==== */
 .swipe-hint{
- position:absolute;
- bottom:90px;
- left:50%;
- transform:translateX(-50%);
- text-align:center;
- color:#fff;
- font-size:13px;
- opacity:0;
- animation:fadeInOut 3s ease forwards;
- z-index:9;
- pointer-events:none;
+  position:absolute;
+  bottom:90px;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  color:#fff;
+  font-size:13px;
+  opacity:0;
+  animation:fadeInOut 3s ease forwards;
+  pointer-events:none;
 }
+
 .swipe-hint span{
- display:block;
- font-size:26px;
- animation:arrowMove 1s infinite;
+  display:block;
+  font-size:26px;
+  animation:arrowMove 1s infinite;
 }
 
 @keyframes arrowMove{
- 0%{transform:translateY(0)}
- 50%{transform:translateY(-10px)}
- 100%{transform:translateY(0)}
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+  100%{transform:translateY(0)}
 }
 
 @keyframes fadeInOut{
- 0%{opacity:0}
- 20%{opacity:1}
- 80%{opacity:1}
- 100%{opacity:0}
+  0%{opacity:0}
+  20%{opacity:1}
+  80%{opacity:1}
+  100%{opacity:0}
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP BANNER -->
+<!-- ===== TOP BANNER ===== -->
 <div id="ad-top">
 <script type="text/javascript">
 atOptions = {
- 'key' : '281ad8525430aef7936dbd51dbb2cc46',
- 'format' : 'iframe',
- 'height' : 50,
- 'width' : 320,
- 'params' : {}
+  'key' : '281ad8525430aef7936dbd51dbb2cc46',
+  'format' : 'iframe',
+  'height' : 50,
+  'width' : 320,
+  'params' : {}
 };
 </script>
-<script type="text/javascript" src="https://beginshello.com/281ad8525430aef7936dbd51dbb2cc46/invoke.js"></script>
+<script src="https://beginshello.com/281ad8525430aef7936dbd51dbb2cc46/invoke.js"></script>
 </div>
+
 <div class="feed" id="feed"></div>
 
-
 <script>
+/* ===== STATE ===== */
 const feed = document.getElementById("feed");
 let currentVideo = null;
 let currentIndex = 0;
+
+/* ===== POPUNDER CONTROL (AMAN) ===== */
+let swipeCount = 0;
+let popTriggered = sessionStorage.getItem("popunder_shown") === "1";
+
+function triggerPopunder(){
+  if(popTriggered) return;
+  popTriggered = true;
+  sessionStorage.setItem("popunder_shown","1");
+
+  setTimeout(()=>{
+    const s = document.createElement("script");
+    s.src = "https://beginshello.com/94/8f/38/948f38c54e4a2e531127f3c221f414a7.js";
+    s.async = true;
+    document.body.appendChild(s);
+  },500); // delay dikit, RPM lebih aman
+}
 
 /* ===== LOAD DATA ===== */
 const list = JSON.parse(localStorage.getItem("VIDEO_LIST")) || [];
 let start = parseInt(localStorage.getItem("START_INDEX")) || 0;
 if(!list.length) location.href="index.html";
 
-/* ===== ORDER ===== */
 const ordered = [...list.slice(start), ...list.slice(0,start)];
 
 /* ===== RENDER ===== */
 ordered.forEach((v,i)=>{
- const item = document.createElement("div");
- item.className = "item";
- item.dataset.vid = v.id;
- item.dataset.index = i;
+  const item = document.createElement("div");
+  item.className = "item";
+  item.dataset.vid = v.id;
+  item.dataset.index = i;
 
- item.innerHTML = `
-  <video src="${v.src}" muted loop playsinline></video>
-  <div class="sound" onclick="toggleSound(this)">🔇</div>
+  item.innerHTML = `
+    <video src="${v.src}" muted loop playsinline></video>
+    <div class="sound" onclick="toggleSound(this)">🔇</div>
 
-  ${i===0 ? `
-  <div class="swipe-hint">
-    <span>⬆⬆⬆</span>
-    Swipe up for next video
-  </div>` : ``}
- `;
- feed.appendChild(item);
+    ${i===0 ? `
+    <div class="swipe-hint">
+      <span>⬆⬆⬆</span>
+      Swipe up for next video
+    </div>` : ``}
+  `;
+  feed.appendChild(item);
 });
 
-/* ===== SOUND ===== */
+/* ===== SOUND PER VIDEO ===== */
 function toggleSound(btn){
- const v = btn.closest(".item").querySelector("video");
- v.muted = !v.muted;
- btn.textContent = v.muted ? "🔇" : "🔊";
+  const v = btn.closest(".item").querySelector("video");
+  v.muted = !v.muted;
+  btn.textContent = v.muted ? "🔇" : "🔊";
 }
 
-/* ===== GO TO ===== */
+/* ===== NAV ===== */
 function goTo(index){
- if(index < 0 || index >= feed.children.length) return;
- feed.children[index].scrollIntoView({behavior:"smooth"});
+  if(index < 0 || index >= feed.children.length) return;
+  feed.children[index].scrollIntoView({behavior:"smooth"});
 }
 
 /* ===== SWIPE DETECT ===== */
 let startY=0,endY=0;
 
 feed.addEventListener("touchstart",e=>{
- startY = e.touches[0].clientY;
+  startY = e.touches[0].clientY;
 });
 
 feed.addEventListener("touchend",e=>{
- endY = e.changedTouches[0].clientY;
- const diff = startY - endY;
- if(Math.abs(diff) < 50) return;
+  endY = e.changedTouches[0].clientY;
+  const diff = startY - endY;
+  if(Math.abs(diff) < 50) return;
 
- if(diff > 0){
-  swipeCount++;
-  if(swipeCount >= 3) triggerPopunder();
-  goTo(currentIndex + 1);
- }else{
-  goTo(currentIndex - 1);
- }
+  if(diff > 0){
+    swipeCount++;
+    if(swipeCount === 3) triggerPopunder();
+    goTo(currentIndex + 1);
+  }else{
+    goTo(currentIndex - 1);
+  }
 });
 
 /* ===== OBSERVER ===== */
 const observer = new IntersectionObserver(entries=>{
- entries.forEach(e=>{
-  const v = e.target.querySelector("video");
-  const vid = e.target.dataset.vid;
-  const sound = e.target.querySelector(".sound");
+  entries.forEach(e=>{
+    const v = e.target.querySelector("video");
+    const vid = e.target.dataset.vid;
+    const sound = e.target.querySelector(".sound");
 
-  if(e.isIntersecting){
-   currentIndex = parseInt(e.target.dataset.index);
+    if(e.isIntersecting){
+      currentIndex = parseInt(e.target.dataset.index);
 
-   if(currentVideo && currentVideo!==v){
-    currentVideo.pause();
-    currentVideo.muted=true;
-   }
+      if(currentVideo && currentVideo!==v){
+        currentVideo.pause();
+        currentVideo.muted = true;
+      }
 
-   currentVideo = v;
-   v.play().catch(()=>{});
+      currentVideo = v;
+      v.play().catch(()=>{});
 
-   history.replaceState(null,"","playback.html?vid="+vid);
-   document.title = "▶ " + vid;
-   sound.textContent = v.muted?"🔇":"🔊";
-  }else{
-   v.pause();
-  }
- });
+      history.replaceState(null,"","playback.html?vid="+vid);
+      document.title = "▶ " + vid;
+      sound.textContent = v.muted ? "🔇" : "🔊";
+    }else{
+      v.pause();
+    }
+  });
 },{threshold:0.9});
 
 document.querySelectorAll(".item").forEach(i=>observer.observe(i));
@@ -207,10 +228,30 @@ document.querySelectorAll(".item").forEach(i=>observer.observe(i));
 /* ===== JUMP FROM URL ===== */
 const urlVid=new URLSearchParams(location.search).get("vid");
 if(urlVid){
- const idx=ordered.findIndex(v=>v.id===urlVid);
- if(idx>-1) setTimeout(()=>goTo(idx),200);
+  const idx=ordered.findIndex(v=>v.id===urlVid);
+  if(idx>-1) setTimeout(()=>goTo(idx),200);
 }
 </script>
 
 </body>
 </html>
+
+<!-- ===== HISTATS ===== -->
+<script type="text/javascript">
+var _Hasync= _Hasync|| [];
+_Hasync.push(['Histats.start', '1,4992245,4,511,95,18,00000000']);
+_Hasync.push(['Histats.fasi', '1']);
+_Hasync.push(['Histats.track_hits', '']);
+(function() {
+  var hs = document.createElement('script');
+  hs.type = 'text/javascript';
+  hs.async = true;
+  hs.src = ('//s10.histats.com/js15_as.js');
+  (document.head || document.body).appendChild(hs);
+})();
+</script>
+<noscript>
+  <a href="/" target="_blank">
+    <img src="//sstatic1.histats.com/0.gif?4992245&101" border="0">
+  </a>
+</noscript>
