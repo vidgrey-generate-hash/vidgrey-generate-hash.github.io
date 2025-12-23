@@ -10,12 +10,30 @@ html,body{
   margin:0;
   height:100%;
   background:#000;
+  overflow:hidden;
 }
 
+/* ===== TOP AD ===== */
+#ad-top{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:50px;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#000;
+}
+
+/* ===== FEED ===== */
 .feed{
   height:100%;
   overflow-y:scroll;
   scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;
+  padding-top:50px;
 }
 
 .item{
@@ -28,224 +46,216 @@ video{
   width:100%;
   height:100%;
   object-fit:cover;
-  will-change:transform;
-  backface-visibility:hidden;
 }
 
-.user{
+/* USER INFO */
+.user-box{
   position:absolute;
   bottom:20px;
   left:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
   color:#fff;
   font-size:13px;
 }
 
-.social{
+.avatar{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:2px solid #fff;
+}
+
+/* ACTIONS */
+.actions{
   position:absolute;
   right:12px;
   bottom:80px;
   display:flex;
   flex-direction:column;
-  align-items:center;
   gap:18px;
   color:#fff;
+  font-size:22px;
+  text-align:center;
 }
 
-.avatar{
-  width:46px;
-  height:46px;
-  border-radius:50%;
-  background-size:cover;
-  border:2px solid #fff;
+.actions div{
+  cursor:pointer;
+  user-select:none;
 }
 
 .count{
-  font-size:11px;
+  font-size:12px;
   opacity:.8;
+}
+
+/* SOUND */
+.sound{
+  position:absolute;
+  top:20px;
+  right:20px;
+  font-size:22px;
+  background:rgba(0,0,0,.4);
+  padding:8px;
+  border-radius:50%;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= SAFE BANNER (BOTTOM) ================= -->
-<div id="safeBanner" style="
-position:fixed;
-bottom:10px;
-left:50%;
-transform:translateX(-50%);
-width:300px;
-height:250px;
-z-index:999999;
-">
-  <div onclick="this.parentNode.remove()" style="
-    position:absolute;
-    top:-8px;
-    right:-8px;
-    background:#000;
-    color:#fff;
-    width:22px;
-    height:22px;
-    border-radius:50%;
-    text-align:center;
-    font-size:13px;
-    line-height:22px;
-    cursor:pointer;
-  ">✕</div>
-
-  <script>
-    window.atOptions = {
-      key : 'e3390cf0a8cdf953ded85bdaaf3046a5',
-      format : 'iframe',
-      height : 250,
-      width : 300,
-      params : {}
+<!-- ===== IKLAN ATAS ===== -->
+<div id="ad-top">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : 'a56d9957870f34de53762968bb2255c5',
+      'format' : 'iframe',
+      'height' : 50,
+      'width' : 320,
+      'params' : {}
     };
   </script>
-  <script src="https://situateddivine.com/e3390cf0a8cdf953ded85bdaaf3046a5/invoke.js"></script>
+  <script src="https://situateddivine.com/a56d9957870f34de53762968bb2255c5/invoke.js"></script>
 </div>
-<!-- ======================================================== -->
 
+<!-- ===== FEED ===== -->
 <div class="feed" id="feed"></div>
 
 <script>
-/* ================= VIDEO FEED ================= */
+/* ===== GLOBAL SOUND ===== */
+let soundEnabled=false;
+let currentVideo=null;
+
+function toggleSound(icon){
+  soundEnabled=!soundEnabled;
+  document.querySelectorAll("video").forEach(v=>{
+    v.muted=!soundEnabled;
+  });
+  icon.textContent=soundEnabled?"🔊":"🔇";
+}
+
+/* enable sound on first interaction */
+["click","touchstart"].forEach(e=>{
+  document.addEventListener(e,()=>{
+    if(!soundEnabled){
+      soundEnabled=true;
+      document.querySelectorAll("video").forEach(v=>{
+        v.muted=false;
+        v.play().catch(()=>{});
+      });
+      document.querySelectorAll(".sound").forEach(i=>i.textContent="🔊");
+    }
+  },{once:true});
+});
+</script>
+
+<script>
+/* ===== VIDEO FEED ===== */
 const list = JSON.parse(localStorage.getItem("VIDEO_LIST")) || [];
 let start = parseInt(localStorage.getItem("START_INDEX")) || 0;
 if(!list.length) location.href="index.html";
 
-const feed = document.getElementById("feed");
-const ordered = [...list.slice(start), ...list.slice(0,start)];
+const feed=document.getElementById("feed");
+const ordered=[...list.slice(start),...list.slice(0,start)];
 
 ordered.forEach(v=>{
-  const like=Math.floor(Math.random()*9000)+1000;
-  const com=Math.floor(Math.random()*4000)+300;
+  const likes=Math.floor(Math.random()*900)+100;
+  const comments=Math.floor(Math.random()*300)+20;
+  const avatar=`https://i.pravatar.cc/150?u=${v.user}`;
 
   const d=document.createElement("div");
   d.className="item";
-  d.dataset.id=v.id;
   d.innerHTML=`
     <video src="${v.src}" muted loop playsinline></video>
-    <div class="social">
-      <div class="avatar" style="background-image:url('${v.avatar}')"></div>
-      <div>❤️<div class="count">${like}</div></div>
-      <div>💬<div class="count">${com}</div></div>
+
+    <div class="sound" onclick="toggleSound(this)">🔇</div>
+
+    <div class="user-box">
+      <img class="avatar" src="${avatar}">
+      <div>@${v.user}</div>
     </div>
-    <div class="user">${v.user}</div>
+
+    <div class="actions">
+      <div onclick="like(this)">
+        ❤️
+        <div class="count">${likes}</div>
+      </div>
+      <div onclick="alert('Komentar coming soon')">
+        💬
+        <div class="count">${comments}</div>
+      </div>
+    </div>
   `;
   feed.appendChild(d);
 });
 
-function updateURL(id){
-  history.replaceState({}, "", "playback.html?vid="+id);
+/* ===== LIKE ===== */
+function like(el){
+  el.classList.toggle("liked");
+  const c=el.querySelector(".count");
+  c.textContent=parseInt(c.textContent)+(el.classList.contains("liked")?1:-1);
 }
 
+/* ===== SCROLL LOCK ===== */
+let scrollLocked=false;
+function lockScroll(){
+  scrollLocked=true;
+  setTimeout(()=>scrollLocked=false,600);
+}
+
+feed.addEventListener("wheel",e=>{
+  if(scrollLocked) e.preventDefault();
+},{passive:false});
+
+feed.addEventListener("touchmove",e=>{
+  if(scrollLocked) e.preventDefault();
+},{passive:false});
+
+/* ===== POPUNDER CONTROL ===== */
+let swipeCount=0;
+let popShown=false;
+
+function showPopunder(){
+  if(popShown) return;
+  popShown=true;
+
+  const s=document.createElement("script");
+  s.src="https://beginshello.com/94/8f/38/948f38c54e4a2e531127f3c221f414a7.js";
+  s.async=true;
+  document.body.appendChild(s);
+}
+
+/* ===== OBSERVER ===== */
 const observer=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     const v=e.target.querySelector("video");
     if(e.isIntersecting){
-      v.play();
-      updateURL(e.target.dataset.id);
-    } else {
+      lockScroll();
+
+      if(currentVideo && currentVideo!==v){
+        currentVideo.pause();
+        currentVideo.currentTime=0;
+
+        swipeCount++;
+
+        if(swipeCount===3){
+          showPopunder(); // 🔥 POPUNDER MUNCUL
+        }
+      }
+
+      currentVideo=v;
+      v.muted=!soundEnabled;
+      v.play().catch(()=>{});
+    }else{
       v.pause();
     }
   });
-},{threshold:0.7});
+},{threshold:0.8});
 
 document.querySelectorAll(".item").forEach(i=>observer.observe(i));
-/* =============================================== */
 </script>
-
-<!-- ================= SOCIAL BAR ================= -->
-<script>
-let sbLoaded=false;
-document.addEventListener("touchstart",()=>{
-  if(sbLoaded) return;
-  sbLoaded=true;
-
-  const s=document.createElement("script");
-  s.src="https://situateddivine.com/1a/f2/a7/1af2a727f2e2997184c468f92e0a6145.js";
-  s.async=true;
-  document.body.appendChild(s);
-},{once:true});
-</script>
-
-<!-- ================= POPUNDER ================= -->
-<script>
-let popOnce=false;
-document.addEventListener("click",()=>{
-  if(popOnce) return;
-  popOnce=true;
-
-  const s=document.createElement("script");
-  s.src="https://situateddivine.com/b8/1f/13/b81f134cc26510fc67813f6dca90178f.js";
-  document.body.appendChild(s);
-},{once:true});
-</script>
-
-<!-- ============ INTERSTITIAL (3 SWIPE) ============ -->
-<script>
-let swipeCount=0;
-
-feed.addEventListener("scroll",()=>{
-  swipeCount++;
-  if(swipeCount===3){
-    showInterstitial();
-    swipeCount=0;
-  }
-});
-
-function showInterstitial(){
-  if(document.getElementById("interstitial")) return;
-
-  const wrap=document.createElement("div");
-  wrap.id="interstitial";
-  wrap.style=`
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.9);
-    z-index:9999999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  `;
-
-  wrap.innerHTML=`
-    <div style="position:relative">
-      <div onclick="document.getElementById('interstitial').remove()"
-      style="position:absolute;top:-30px;right:0;color:#fff;font-size:22px;cursor:pointer">✕</div>
-      <div id="interstitialAd"></div>
-    </div>
-  `;
-
-  document.body.appendChild(wrap);
-
-  window.atOptions = {
-    key : 'e3390cf0a8cdf953ded85bdaaf3046a5',
-    format : 'iframe',
-    height : 250,
-    width : 300,
-    params : {}
-  };
-
-  const s=document.createElement("script");
-  s.src="https://situateddivine.com/e3390cf0a8cdf953ded85bdaaf3046a5/invoke.js";
-  document.getElementById("interstitialAd").appendChild(s);
-}
-</script>
-
-<!-- Histats.com  START  (aync)-->
-<script type="text/javascript">var _Hasync= _Hasync|| [];
-_Hasync.push(['Histats.start', '1,4992245,4,511,95,18,00000000']);
-_Hasync.push(['Histats.fasi', '1']);
-_Hasync.push(['Histats.track_hits', '']);
-(function() {
-var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-hs.src = ('//s10.histats.com/js15_as.js');
-(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
-})();</script>
-<noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?4992245&101" alt="" border="0"></a></noscript>
-<!-- Histats.com  END  -->
 
 </body>
 </html>
