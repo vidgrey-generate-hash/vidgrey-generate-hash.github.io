@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+<meta name="referrer" content="no-referrer-when-downgrade" />
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Video Playback</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Playback</title>
 
 <style>
 html,body{
@@ -11,247 +12,221 @@ html,body{
   height:100%;
   background:#000;
   overflow:hidden;
+  font-family:sans-serif;
+  color:#fff;
 }
-
-/* ===== TOP AD ===== */
-#ad-top{
-  position:fixed;
-  top:0;
-  left:0;
+#ad-b{
+  display:auto;          /* awalnya HIDDEN */
+  position:absolute;
   width:100%;
-  height:50px;
-  z-index:9999;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#000;
+  z-index:40;
+  pointer-events:auto;
 }
-
-/* ===== FEED ===== */
-.feed{
-  height:100%;
-  overflow-y:scroll;
-  scroll-snap-type:y mandatory;
-  -webkit-overflow-scrolling:touch;
-  padding-top:50px; /* penting: biar ga ketutup iklan */
+#ad-t{
+  display:auto;
+  position:absolute;
+  top:60px;
+  width:100%;
+  z-index:999;       /* 🔥 WAJIB tinggi */
+  pointer-events:auto;
 }
-
-.item{
-  height:100%;
+#ad-b{ bottom:85px }
+#viewport{
   position:relative;
-  scroll-snap-align:start;
+  height:100vh;
+  width:100%;
 }
-
 video{
   width:100%;
   height:100%;
   object-fit:cover;
 }
-
-/* SOUND */
-.sound{
-  position:absolute;
-  top:27px;
-  right:35px;
-  font-size:21px;
-  padding:10px;
-  color:#fff;
-  z-index:10;
-}
-
-/* ==== SWIPE HINT ==== */
-.swipe-hint{
+.overlay{
   position:absolute;
   bottom:90px;
-  left:50%;
-  transform:translateX(-50%);
+  left:14px;
+}
+.user{font-weight:bold;margin-bottom:6px}
+.caption{font-size:14px}
+.right{
+  position:absolute;
+  right:12px;
+  bottom:110px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+}
+.right img{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:2px solid #fff;
+}
+.icon{text-align:center;font-size:13px}
+.swipe{
+  position:absolute;
+  bottom:24px;
+  width:100%;
   text-align:center;
-  color:#fff;
-  font-size:13px;
-  opacity:0;
-  animation:fadeInOut 3s ease forwards;
-  pointer-events:none;
-}
-
-.swipe-hint span{
-  display:block;
-  font-size:26px;
-  animation:arrowMove 1s infinite;
-}
-
-@keyframes arrowMove{
-  0%{transform:translateY(0)}
-  50%{transform:translateY(-10px)}
-  100%{transform:translateY(0)}
-}
-
-@keyframes fadeInOut{
-  0%{opacity:0}
-  20%{opacity:1}
-  80%{opacity:1}
-  100%{opacity:0}
+  opacity:.8;
 }
 </style>
 </head>
 
 <body>
+<div id="viewport">
+  <video id="video" playsinline autoplay muted></video>
 
-<!-- ===== TOP BANNER ===== -->
-<div id="ad-top">
-<script type="text/javascript">
-atOptions = {
-  'key' : '281ad8525430aef7936dbd51dbb2cc46',
-  'format' : 'iframe',
-  'height' : 50,
-  'width' : 320,
-  'params' : {}
-};
-</script>
-<script src="https://beginshello.com/281ad8525430aef7936dbd51dbb2cc46/invoke.js"></script>
+  <div class="overlay">
+    <div class="user" id="user">@username</div>
+    <div class="caption" id="caption">🔥 Viral video</div>
+  </div>
+
+  <div class="right">
+    <img id="avatar">
+    <div class="icon">❤️<span id="like">12K</span></div>
+    <div class="icon">💬<span id="comment">321</span></div>
+  </div>
+
+  <div class="swipe">⬆ Swipe up for next video</div>
 </div>
 
-<div class="feed" id="feed"></div>
-
 <script>
-/* ===== STATE ===== */
-const feed = document.getElementById("feed");
-let currentVideo = null;
-let currentIndex = 0;
+const videos = JSON.parse(localStorage.getItem("VIDEO_LIST") || "[]");
+let index = parseInt(localStorage.getItem("START_INDEX") || 0);
 
-/* ===== POPUNDER CONTROL (AMAN) ===== */
+/* ELEMENT */
+const video = document.getElementById("video");
+const user = document.getElementById("user");
+const avatar = document.getElementById("avatar");
+const like = document.getElementById("like");
+const comment = document.getElementById("comment");
+const caption = document.getElementById("caption");
+
+const adTop = document.getElementById("ad-t");
+const adBottom = document.getElementById("ad-b");
+
+/* RANDOM */
+const captions=[
+  "no words, just ice spice.😍💦",
+  "the eyes were on him—yet he grinned straight into the lens 👀🙈",
+  "Fix bikin nagih",
+  "Auto replay 😍"
+];
+function rand(a,b){return Math.floor(Math.random()*(b-a))+a}
+
+/* ===== IKLAN CONTROL ===== */
 let swipeCount = 0;
-let popTriggered = sessionStorage.getItem("popunder_shown") === "1";
+let lastSwipeTime = 0;
+let adTimer = null;
+let allowAds = false;
 
-function triggerPopunder(){
-  if(popTriggered) return;
-  popTriggered = true;
-  sessionStorage.setItem("popunder_shown","1");
+/* tampilkan iklan dengan delay pintar */
+function showAdsSmart(){
+  if(!allowAds) return;
 
-  setTimeout(()=>{
-    const s = document.createElement("script");
-    s.src = "https://beginshello.com/94/8f/38/948f38c54e4a2e531127f3c221f414a7.js";
-    s.async = true;
-    document.body.appendChild(s);
-  },500); // delay dikit, RPM lebih aman
+  clearTimeout(adTimer);
+  adTimer = setTimeout(()=>{
+    adTop.style.display="auto";
+    adBottom.style.display="auto";
+  }, 2500); // ⏱️ delay aman 2.5 detik
 }
 
-/* ===== LOAD DATA ===== */
-const list = JSON.parse(localStorage.getItem("VIDEO_LIST")) || [];
-let start = parseInt(localStorage.getItem("START_INDEX")) || 0;
-if(!list.length) location.href="index.html";
-
-const ordered = [...list.slice(start), ...list.slice(0,start)];
-
-/* ===== RENDER ===== */
-ordered.forEach((v,i)=>{
-  const item = document.createElement("div");
-  item.className = "item";
-  item.dataset.vid = v.id;
-  item.dataset.index = i;
-
-  item.innerHTML = `
-    <video src="${v.src}" muted loop playsinline></video>
-    <div class="sound" onclick="toggleSound(this)">🔇</div>
-
-    ${i===0 ? `
-    <div class="swipe-hint">
-      <span>⬆⬆⬆</span>
-      Swipe up for next video
-    </div>` : ``}
-  `;
-  feed.appendChild(item);
-});
-
-/* ===== SOUND PER VIDEO ===== */
-function toggleSound(btn){
-  const v = btn.closest(".item").querySelector("video");
-  v.muted = !v.muted;
-  btn.textContent = v.muted ? "🔇" : "🔊";
+/* sembunyikan iklan */
+function hideAds(){
+  /* social bar JANGAN di-hide */
+  adBottom.style.display="auto";
 }
 
-/* ===== NAV ===== */
-function goTo(index){
-  if(index < 0 || index >= feed.children.length) return;
-  feed.children[index].scrollIntoView({behavior:"smooth"});
+/* ===== LOAD VIDEO ===== */
+function loadVideo(i){
+  const v = videos[i];
+  if(!v) return;
+
+  video.src = v.src;
+  video.play();
+
+  user.innerText = v.user;
+  avatar.src = "https://i.pravatar.cc/150?img="+rand(1,70);
+  like.innerText = rand(1,99)+"K";
+  comment.innerText = rand(10,999);
+  caption.innerText = captions[rand(0,captions.length)];
+
+  history.replaceState({}, "", "playback.html?vid="+v.user.replace("@",""));
+
+  swipeCount++;
+
+function showAdsSmart(){
+  if(!allowAds) return;
+
+  clearTimeout(adTimer);
+  adTimer = setTimeout(()=>{
+    /* social bar tampil SEKALI */
+    if(adTop.style.display!=="auto"){
+      adTop.style.display="auto";
+    }
+
+    /* iframe iklan aman */
+    adBottom.style.display="auto";
+  }, 2500);
 }
+}
+
+/* ===== TAP UNMUTE + AKTIFKAN IKLAN ===== */
+document.body.addEventListener("click",()=>{
+  video.muted=false;
+  video.play();
+  allowAds = true; // ✅ user interaction nyata
+},{once:true});
 
 /* ===== SWIPE DETECT ===== */
-let startY=0,endY=0;
-
-feed.addEventListener("touchstart",e=>{
+let startY=0;
+document.addEventListener("touchstart",e=>{
   startY = e.touches[0].clientY;
 });
 
-feed.addEventListener("touchend",e=>{
-  endY = e.changedTouches[0].clientY;
-  const diff = startY - endY;
-  if(Math.abs(diff) < 50) return;
+document.addEventListener("touchend",e=>{
+  const endY = e.changedTouches[0].clientY;
+  const now = Date.now();
+  const swipeSpeed = now - lastSwipeTime;
+  lastSwipeTime = now;
 
-  if(diff > 0){
-    swipeCount++;
-    if(swipeCount === 3) triggerPopunder();
-    goTo(currentIndex + 1);
-  }else{
-    goTo(currentIndex - 1);
+  /* kalau swipe cepat → hide iklan */
+  if(swipeSpeed < 500){
+    hideAds();
+  }
+
+  if(startY-endY>60){
+    index=(index+1)%videos.length;
+    loadVideo(index);
+  }
+  if(endY-startY>60){
+    index=(index-1+videos.length)%videos.length;
+    loadVideo(index);
   }
 });
 
-/* ===== OBSERVER ===== */
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    const v = e.target.querySelector("video");
-    const vid = e.target.dataset.vid;
-    const sound = e.target.querySelector(".sound");
-
-    if(e.isIntersecting){
-      currentIndex = parseInt(e.target.dataset.index);
-
-      if(currentVideo && currentVideo!==v){
-        currentVideo.pause();
-        currentVideo.muted = true;
-      }
-
-      currentVideo = v;
-      v.play().catch(()=>{});
-
-      history.replaceState(null,"","playback.html?vid="+vid);
-      document.title = "▶ " + vid;
-      sound.textContent = v.muted ? "🔇" : "🔊";
-    }else{
-      v.pause();
-    }
-  });
-},{threshold:0.9});
-
-document.querySelectorAll(".item").forEach(i=>observer.observe(i));
-
-/* ===== JUMP FROM URL ===== */
-const urlVid=new URLSearchParams(location.search).get("vid");
-if(urlVid){
-  const idx=ordered.findIndex(v=>v.id===urlVid);
-  if(idx>-1) setTimeout(()=>goTo(idx),200);
+/* ===== START ===== */
+if(videos.length){
+  loadVideo(index);
+}else{
+  alert("VIDEO_LIST kosong, buka dari index.html");
 }
 </script>
 
+
 </body>
 </html>
-
-<!-- ===== HISTATS ===== -->
-<script type="text/javascript">
-var _Hasync= _Hasync|| [];
+<!-- Histats.com  START  (aync)-->
+<script type="text/javascript">var _Hasync= _Hasync|| [];
 _Hasync.push(['Histats.start', '1,4992245,4,511,95,18,00000000']);
 _Hasync.push(['Histats.fasi', '1']);
 _Hasync.push(['Histats.track_hits', '']);
 (function() {
-  var hs = document.createElement('script');
-  hs.type = 'text/javascript';
-  hs.async = true;
-  hs.src = ('//s10.histats.com/js15_as.js');
-  (document.head || document.body).appendChild(hs);
-})();
-</script>
-<noscript>
-  <a href="/" target="_blank">
-    <img src="//sstatic1.histats.com/0.gif?4992245&101" border="0">
-  </a>
-</noscript>
+var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+hs.src = ('//s10.histats.com/js15_as.js');
+(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+})();</script>
+<noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?4992245&101" alt="" border="0"></a></noscript>
+<!-- Histats.com  END  -->
