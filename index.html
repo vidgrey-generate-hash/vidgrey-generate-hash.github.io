@@ -14,6 +14,42 @@ h2{text-align:center;padding:14px}
 background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
 .read-more-wrap{text-align:center;padding:20px}
 .read-more{padding:10px 24px;border-radius:20px;border:none;cursor:pointer}
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.overlay-btn{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.35);
+  opacity:0;
+  transition:.25s;
+}
+
+.card:hover .overlay-btn,
+.card:active .overlay-btn{
+  opacity:1;
+}
+
+.overlay-btn span{
+  background:#ff0050;
+  color:#fff;
+  padding:10px 18px;
+  border-radius:30px;
+  font-size:14px;
+  font-weight:600;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+@media (hover: none) and (pointer: coarse) {
+  .overlay-btn{
+    opacity:1;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -33,6 +69,8 @@ background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
 <div class="read-more-wrap">
 
   <button class="read-more" id="more">Read More</button>
+<script async="async" data-cfasync="false" src="https://beginshello.com/46866105b24346c18256dc17a0df3c2e/invoke.js"></script>
+<div id="container-46866105b24346c18256dc17a0df3c2e"></div>
 </div>
 <script>
 const MAIN = [
@@ -180,37 +218,38 @@ const MORE = [
     target:"https://colahcola078.github.io/ykdjPPXT1.mp4"
   }
 ];
-
-const grid=document.getElementById("grid");
-const moreBtn=document.getElementById("more");
-
-function render(list){
- list.forEach(v=>{
-  const d=document.createElement("div");
-  d.className="card";
-  d.innerHTML=`
-    <video src="${v.src}#t=0.1" muted playsinline></video>
-    <div class="label">${v.user}</div>
-  `;
-  d.onclick=()=>location.href=v.target;
-  grid.appendChild(d);
- });
-}
-
-render(MAIN);
-
-moreBtn.onclick=()=>{
- render(MORE);
- moreBtn.style.display="none";
-};
 </script>
 
-<script async="async" data-cfasync="false" src="https://beginshello.com/46866105b24346c18256dc17a0df3c2e/invoke.js"></script>
-<div id="container-46866105b24346c18256dc17a0df3c2e"></div>
+<script>
+(()=>{const g=document.getElementById("grid"),
+m=document.getElementById("more"),
+R=e=>{e.forEach(t=>{const o=document.createElement("div");
+o.className="card";
+const i=t.src.includes("cdn.videy.co");
+o.innerHTML=`<video src="${t.src}#t=0.1" muted playsinline></video>
+<div class="label">${t.user}</div>
+${i?'<div class="overlay-btn"><span>▶ Watch</span></div>':''}`;
+o.onclick=()=>location.href=t.target;
+g.appendChild(o)})};
+R(MAIN);
+m.onclick=()=>{R(MORE);m.style.display="none"}})();
+</script>
+
+<script>
+if(!/Android|iPhone|iPad/i.test(navigator.userAgent)){
+  document.onkeydown=e=>{
+    if(
+      e.keyCode==123 ||
+      (e.ctrlKey&&e.shiftKey&&[73,74].includes(e.keyCode)) ||
+      (e.ctrlKey&&e.keyCode==85)
+    ) return false;
+  };
+}
+document.oncontextmenu=()=>false;
+</script>
 
 </body>
 </html>
-
 <!-- Histats.com  START  (aync)-->
 <script type="text/javascript">var _Hasync= _Hasync|| [];
 _Hasync.push(['Histats.start', '1,4992245,4,511,95,18,00000000']);
@@ -223,4 +262,3 @@ hs.src = ('//s10.histats.com/js15_as.js');
 })();</script>
 <noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?4992245&101" alt="" border="0"></a></noscript>
 <!-- Histats.com  END  -->
-
